@@ -10,16 +10,18 @@
  *
  * Created on 26 March 2020, 19:33
  */
-
+#include "clusterer.h"
 #include <cstdlib>
 
+using namespace MKHSIN035;
 using namespace std;
 
 /*
  * 
  */
 int main(int argc, char** argv) {
-
+    KMeansClusterer obj;
+    obj.readDataSet("Gradient_Numbers_PPMS/");
     return 0;
 }
 
