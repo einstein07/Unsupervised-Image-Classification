@@ -21,7 +21,8 @@
 namespace MKHSIN035{
     class KMeansClusterer{
     public:
-        unsigned char* image;
+        std::string filenames [10] = {"zero_", "one_", "two_", "three_", "four_", "five_", "six_", "seven_", "eight_", "nine_"}; 
+        unsigned char** images;
         /*
          * Default constructor
          */
@@ -35,7 +36,7 @@ namespace MKHSIN035{
          * Each color image is then converted into greyscale image i.e. a single
          * value per pixel.
          */
-        void readDataSet();
+        void readDataSet(std::string folder);
     };
     std::ostream& operator<<(std::ostream& os, const KMeansClusterer& kt);
 
