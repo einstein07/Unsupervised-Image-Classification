@@ -46,14 +46,20 @@ void KMeansClusterer::readDataSet(string folder){
                         begin = dataset.tellg();
                     }
                 }
-                images[counter] = new unsigned char[end-begin];
+                images[counter] = new unsigned char[(end-begin)+1];
                 char buf[end-begin];
                 unsigned char val [end-begin];
                 dataset.read(buf, (end-begin));
                 memcpy(&val, buf, sizeof(val));
-                images[counter] = val; 
-                            
-                cout<<"Done reading: "<<filename<<endl;
+                //Store the size first
+                images[counter][0] = (end-begin);
+                for (int k = 1; k <= ((end-begin)+1); k++){
+                    images[counter][k] = val[k-1];
+                    //cout<<+images[counter][k]<<" ";
+                }
+                 
+                cout<<endl;            
+                cout<<"Image "<<i<<" length: "<< (end-begin)<<endl;
 
             }
             else{
@@ -64,6 +70,38 @@ void KMeansClusterer::readDataSet(string folder){
         }
     }
     
+}
+
+void MKHSIN035::KMeansClusterer::imageFeature(int bin){
+    //feature = new int* [100];
+    
+    int Lbound = 0;
+    int Ubound = bin;
+    
+    
+    for(int i = 0; i < 100; i++){
+        cout<<"Size of image "<<(i+1)<<": "<<+images[i][0]<<endl;
+        int entries = images[i][0]/bin;
+        vector <int> features(entries,0);
+
+        for (int k = 0; k < entries; k++){
+            for (int j = 0; j <= images[i][0]; j++){
+                if (images[i][j] >= Lbound && images[i][j] < Ubound){
+                    features[k]++;
+                }
+
+            }
+                  
+            Lbound += bin;
+            Ubound += bin;
+
+        }
+                    
+        cout<<"Done creating feature for image: "<<i<<". Num of entries: "<<entries<<endl;
+
+        feature.push_back(features);
+        
+    }
 }
 
 ostream& operator<<(std::ostream& os, const KMeansClusterer& kt){
