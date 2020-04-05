@@ -22,12 +22,12 @@ namespace MKHSIN035{
     class Image{
     private:
         std::string filename;
-        int intensitylen;
+        int greyscalelen;
         int featurelen;
         friend class KMeansClusterer;
     public:
         //Stores intensity values for each pixel
-        unsigned char* intensity;
+        unsigned char* greyscale;
         int* feature;
         Image(std::string name);
         ~Image();
@@ -38,7 +38,7 @@ namespace MKHSIN035{
         /*
          * Sets the length of the intensity array 
          */
-        void setintensitylen(int len);
+        void setgreyscalelen(int len);
         /*
          * Returns filename of image
          */
@@ -47,7 +47,7 @@ namespace MKHSIN035{
         /*
          * Returns the length of the intensity array
          */
-        int getintensitylen();
+        int getgreyscalelen();
         
         /*
          * Returns the length of the feature array
