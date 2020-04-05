@@ -22,6 +22,7 @@ using namespace std;
 int main(int argc, char** argv) {
     KMeansClusterer obj;
     obj.readDataSet("Gradient_Numbers_PPMS/");
+    obj.imageFeature(4);
     return 0;
 }
 
