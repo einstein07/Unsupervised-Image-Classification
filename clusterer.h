@@ -46,7 +46,7 @@ namespace MKHSIN035{
         /*
          * Sets cluster id for this image
          */
-        void setClusterid(int cluster_id);
+        void setClusterId(int cluster_id);
         /*
          * Returns filename of image
          */
@@ -82,11 +82,6 @@ namespace MKHSIN035{
          * Cluster constructor
          */
         Cluster(int cluster_id, Image image);
-        
-        /*
-         * Adds new image to images vector
-         */
-        void addImage(Image image);
         
         /*
          * Removes image specified by filename 
@@ -126,6 +121,7 @@ namespace MKHSIN035{
     class KMeansClusterer{
     private:
         int Kvalue;
+        vector<Cluster> clusters;
     public:
         std::string filenames [10] = {"zero_", "one_", "two_", "three_", "four_", "five_", "six_", "seven_", "eight_", "nine_"}; 
         std::vector<Image> images;
