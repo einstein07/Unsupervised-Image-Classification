@@ -20,11 +20,15 @@
 
 namespace MKHSIN035{
     class Image{
+    
     private:
+    
         std::string filename;
         int greyscalelen;
         int featurelen;
+        int cluster_id;
         friend class KMeansClusterer;
+    
     public:
         //Stores intensity values for each pixel
         unsigned char* greyscale;
@@ -40,6 +44,10 @@ namespace MKHSIN035{
          */
         void setgreyscalelen(int len);
         /*
+         * Sets cluster id for this image
+         */
+        void setClusterid(int cluster_id);
+        /*
          * Returns filename of image
          */
         std::string getfilename();
@@ -53,19 +61,85 @@ namespace MKHSIN035{
          * Returns the length of the feature array
          */
         int getfeaturelen();
+        
+        /*
+         * Returns cluster id for this image
+         */
+        int getClusterId();
+        
     };
+    
+    
+    
+    class Cluster{
+    private:
+        int id;
+        std::vector <double> mean;
+        std::vector <Image> images;
+    public: 
+        
+        /*
+         * Cluster constructor
+         */
+        Cluster(int cluster_id, Image image);
+        
+        /*
+         * Adds new image to images vector
+         */
+        void addImage(Image image);
+        
+        /*
+         * Removes image specified by filename 
+         */
+        bool removeImage(std::string filename);
+        
+        /*
+         * sets mean
+         */
+        void setMean(int position, double value);
+        
+        /*
+         * Returns id for this cluster
+         */
+        int getId();
+        
+        /*
+         * Returns the image at index 'position'
+         */
+        Image getImage(int position);
+        
+        /*
+         * Returns size of images vector
+         */
+        int getSize();
+        
+        /*
+         * Returns the mean by position
+         */
+        double getMean(int position);
+        
+        
+    };
+    
+    
+    
     class KMeansClusterer{
+    private:
+        int Kvalue;
     public:
         std::string filenames [10] = {"zero_", "one_", "two_", "three_", "four_", "five_", "six_", "seven_", "eight_", "nine_"}; 
         std::vector<Image> images;
+        
         /*
          * Default constructor
          */
         KMeansClusterer();
+        
         /*
          * Destructor
          */
         ~KMeansClusterer();
+        
         /*
          * This method reads the color images. 
          * Each color image is then converted into greyscale image i.e. a single
@@ -77,6 +151,15 @@ namespace MKHSIN035{
          * This method uses a histogram to create an image feature for each image
          */
         void imageFeature(int bin);
+        
+        int closestCentroid(Image image);
+
+        
+        /*
+         * This method generates k clusters using the K-means algorithm.
+         * 
+         */
+        void kmeans(int k);
     };
     std::ostream& operator<<(std::ostream& os, const KMeansClusterer& kt);
 
