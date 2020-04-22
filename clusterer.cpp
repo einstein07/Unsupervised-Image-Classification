@@ -36,9 +36,9 @@ void MKHSIN035::Image::setgreyscalelen(int len){greyscalelen = len;}
 void MKHSIN035::Image::setfeaturelen(int len){featurelen = len;}
 
 /*
- * setClusterId method definition 
+ * setClusterId(int) method definition 
  */
-void MKHSIN035::Image::setClusterid(int cluster_id){this->cluster_id = cluster_id;}
+void MKHSIN035::Image::setClusterId(int cluster_id){this->cluster_id = cluster_id;}
 
 /*
  * getfilename definition
@@ -46,19 +46,75 @@ void MKHSIN035::Image::setClusterid(int cluster_id){this->cluster_id = cluster_i
 string MKHSIN035::Image::getfilename(){return filename;}
 
 /*
- * getintensitylen definition
+ * getintensitylen() definition
  */
 int MKHSIN035::Image::getgreyscalelen(){return greyscalelen;}
 
 /*
- * getintensitylen definition
+ * getintensitylen() definition
  */
 int MKHSIN035::Image::getfeaturelen(){return featurelen;}
 
 /*
- * getClusterId definition
+ * getClusterId() definition
  */
 int MKHSIN035::Image::getClusterId(){return this->cluster_id;}
+
+//------------------------------------------------------------------------------
+//               Class Cluster member functions definitions
+//------------------------------------------------------------------------------
+
+/*
+ * Constructor definition
+ */
+MKHSIN035::Cluster::Cluster(int cluster_id, Image image):id(cluster_id){
+    for(int i = 0; i < image.getfeaturelen(); i++){
+        this->mean.push_back(image.feature[i]);
+    }
+    image.setClusterId(this->id);
+    images.push_back(image);
+}
+
+/*
+ * removeImage definition
+ */
+bool MKHSIN035::Cluster::removeImage(std::string filename){
+    for(Image &obj:images){
+        if(obj.getfilename() == filename){
+            images.erase(images.begin() + i);
+            return true;
+        }
+    }
+    return false;
+}
+
+/*
+ * setMean function definition
+ */
+void MKHSIN035::Cluster::setMean(int position, double value){
+    this->mean[position] = value;
+}
+
+/*
+ * getId function definition
+ */
+int MKHSIN035::Cluster::getId(){return this->id;}
+
+/*
+ * getImage function definition
+ */
+Image MKHSIN035::Cluster::getImage(int position){return images[position];}
+
+/*
+ * getSize function definition
+ */
+int MKHSIN035::Cluster::getSize(){return images.size();}
+
+/*
+ * getMean function definition
+ */
+double MKHSIN035::Cluster::getMean(int position){return mean[position];}
+
 
 //------------------------------------------------------------------------------
 //               Class KMeansClusterer member functions definitions
