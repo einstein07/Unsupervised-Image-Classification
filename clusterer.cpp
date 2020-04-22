@@ -246,6 +246,18 @@ void MKHSIN035::KMeansClusterer::imageFeature(int bin){
     }
 }
 
+int MKHSIN035::KMeansClusterer::closestCentroid(Image image){
+    double sum = 0;
+    double minDist;
+    int closestClusterId;
+    
+    for(int i = 0; i < image.getfeaturelen(); i++){
+        sum += pow(clusters[0].getMean(i)- image.feature[i], 2);
+    }
+    
+}
+
+
 void MKHSIN035::KMeansClusterer::kmeans(int k){
     
 }
