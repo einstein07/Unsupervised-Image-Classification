@@ -11,6 +11,10 @@
 using namespace MKHSIN035;
 using namespace std;
 
+//------------------------------------------------------------------------------
+//                      Class Image member functions definitions
+//------------------------------------------------------------------------------
+
 /*
  * Default Constructor definition for Image class
  */
@@ -20,15 +24,6 @@ MKHSIN035::Image::Image(std::string name):filename(name){}
  * Destructor definition for KMeansClusterer
  */
 MKHSIN035::Image::~Image(){}
-/*
- * Default Constructor definition for KMeansClusterer
- */
-MKHSIN035::KMeansClusterer::KMeansClusterer(){}
-
-/*
- * Destructor definition for KMeansClusterer
- */
-MKHSIN035::KMeansClusterer::~KMeansClusterer(){}
 
 /*
  * setintensitylen definition
@@ -41,6 +36,16 @@ void MKHSIN035::Image::setgreyscalelen(int len){greyscalelen = len;}
 void MKHSIN035::Image::setfeaturelen(int len){featurelen = len;}
 
 /*
+ * setClusterId method definition 
+ */
+void MKHSIN035::Image::setClusterid(int cluster_id){this->cluster_id = cluster_id;}
+
+/*
+ * getfilename definition
+ */
+string MKHSIN035::Image::getfilename(){return filename;}
+
+/*
  * getintensitylen definition
  */
 int MKHSIN035::Image::getgreyscalelen(){return greyscalelen;}
@@ -51,9 +56,23 @@ int MKHSIN035::Image::getgreyscalelen(){return greyscalelen;}
 int MKHSIN035::Image::getfeaturelen(){return featurelen;}
 
 /*
- * getfilename definition
+ * getClusterId definition
  */
-string MKHSIN035::Image::getfilename(){return filename;}
+int MKHSIN035::Image::getClusterId(){return this->cluster_id;}
+
+//------------------------------------------------------------------------------
+//               Class KMeansClusterer member functions definitions
+//------------------------------------------------------------------------------
+/*
+ * Default Constructor definition for KMeansClusterer
+ */
+MKHSIN035::KMeansClusterer::KMeansClusterer(){}
+
+/*
+ * Destructor definition for KMeansClusterer
+ */
+MKHSIN035::KMeansClusterer::~KMeansClusterer(){}
+
 
 void KMeansClusterer::readDataSet(string folder){
     string extension = ".ppm";
@@ -170,6 +189,11 @@ void MKHSIN035::KMeansClusterer::imageFeature(int bin){
 
     }
 }
+
+void MKHSIN035::KMeansClusterer::kmeans(int k){
+    
+}
+
 
 ostream& operator<<(std::ostream& os, const KMeansClusterer& kt){
     
