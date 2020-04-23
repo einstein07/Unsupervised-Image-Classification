@@ -20,11 +20,28 @@ using namespace std;
  * 
  */
 int main(int argc, char** argv) {
-    KMeansClusterer obj(10);
-    obj.readDataSet("Gradient_Numbers_PPMS/");
-    obj.imageFeature(1);
+    //get the location of the folder that contains the images to be clustered
+    string dataset = argv[1];
+    string outputfile;
+    int k = 10;
+    int bin = 1;
+    if(argc > 2)
+        outputfile = argv[2];
+    else
+        outputfile = NULL;
+    if(argc > 3)
+        k = atoi(argv[3]);
+    if(argc > 4)
+        bin = atoi(argv[4]);
+    KMeansClusterer obj(k);
+    obj.readDataSet(dataset);
+    obj.imageFeature(bin);
     obj.kmeans();
-    cout<<obj;
+    if(outputfile == NULL)
+        cout<<obj;
+    else{
+        
+    }
     return 0;
 }
 
