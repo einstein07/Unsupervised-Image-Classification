@@ -20,9 +20,11 @@ using namespace std;
  * 
  */
 int main(int argc, char** argv) {
-    KMeansClusterer obj;
+    KMeansClusterer obj(10);
     obj.readDataSet("Gradient_Numbers_PPMS/");
-    obj.imageFeature(4);
+    obj.imageFeature(1);
+    obj.kmeans();
+    cout<<obj;
     return 0;
 }
 
