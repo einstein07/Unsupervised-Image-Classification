@@ -7,6 +7,8 @@
  * Created on 26 March 2020, 22:05
  */
 
+#include <valarray>
+
 #include "clusterer.h"
 using namespace MKHSIN035;
 using namespace std;
@@ -18,7 +20,7 @@ using namespace std;
 /*
  * Default Constructor definition for Image class
  */
-MKHSIN035::Image::Image(std::string name):filename(name){}
+MKHSIN035::Image::Image(std::string name):filename(name), cluster_id(0){}
 
 /*
  * Destructor definition for KMeansClusterer
@@ -71,17 +73,23 @@ MKHSIN035::Cluster::Cluster(int cluster_id, Image image):id(cluster_id){
     for(int i = 0; i < image.getfeaturelen(); i++){
         this->mean.push_back(image.feature[i]);
     }
-    image.setClusterId(this->id);
-    images.push_back(image);
+    this->addImage(image);
 }
-
+/*
+ * addImage definition
+ */
+void MKHSIN035::Cluster::addImage(Image image){
+    image.setClusterId(this->id);
+    clusterImages.push_back(image);
+}
 /*
  * removeImage definition
  */
 bool MKHSIN035::Cluster::removeImage(std::string filename){
-    for(Image &obj:images){
-        if(obj.getfilename() == filename){
-            images.erase(images.begin() + i);
+    for(int i = 0; i < clusterImages.size(); i++){
+        if(clusterImages[i].getfilename() == filename){
+            //vector<Image>::const_iterator it = find(images.begin(), images.end(), obj);
+            clusterImages.erase(clusterImages.begin()+i);
             return true;
         }
     }
@@ -103,12 +111,12 @@ int MKHSIN035::Cluster::getId(){return this->id;}
 /*
  * getImage function definition
  */
-Image MKHSIN035::Cluster::getImage(int position){return images[position];}
+Image MKHSIN035::Cluster::getImage(int position){return clusterImages[position];}
 
 /*
  * getSize function definition
  */
-int MKHSIN035::Cluster::getSize(){return images.size();}
+int MKHSIN035::Cluster::getSize(){return clusterImages.size();}
 
 /*
  * getMean function definition
@@ -120,9 +128,9 @@ double MKHSIN035::Cluster::getMean(int position){return mean[position];}
 //               Class KMeansClusterer member functions definitions
 //------------------------------------------------------------------------------
 /*
- * Default Constructor definition for KMeansClusterer
+ * Constructor definition for KMeansClusterer
  */
-MKHSIN035::KMeansClusterer::KMeansClusterer(){}
+MKHSIN035::KMeansClusterer::KMeansClusterer(int K):Kvalue(K){}
 
 /*
  * Destructor definition for KMeansClusterer
@@ -138,8 +146,10 @@ void KMeansClusterer::readDataSet(string folder){
     int counter = 0;
     for (int i = 0; i < 10; i++){
         for(int j = 1; j <=10; j++ ){
-            filename = folder+filenames[i]+to_string(j)+extension;
-            Image obj(filename);
+            
+            string name = filenames[i]+to_string(j)+extension;
+            Image obj(name);
+            filename = folder+name;
             dataset.open(filename, ios::binary|ios::ate); 
             streampos begin,end;
             
@@ -184,16 +194,16 @@ void KMeansClusterer::readDataSet(string folder){
         }
     }
     
-    for(int i = 0; i < images.size(); i++){
-                                        
-        cout<<"\nDone reading image "<<images[i].getfilename()<<"\nSize: "<<images[i].getgreyscalelen()<<endl;            
-
-        for (int j = 0; j < images[i].getgreyscalelen(); j++){
-            cout<<+images[i].greyscale[j]<<" ";            
-
-        }
-
-    }
+//    for(int i = 0; i < images.size(); i++){
+//                                        
+//        cout<<"\nDone reading image "<<images[i].getfilename()<<"\nSize: "<<images[i].getgreyscalelen()<<endl;            
+//
+//        for (int j = 0; j < images[i].getgreyscalelen(); j++){
+//            cout<<+images[i].greyscale[j]<<" ";            
+//
+//        }
+//
+//    }
     
 }
 
@@ -234,16 +244,7 @@ void MKHSIN035::KMeansClusterer::imageFeature(int bin){
         
     }
     
-    for(int i = 0; i < images.size(); i++){
-                                        
-        cout<<"Image "<<images[i].getfilename()<<" Feature length: "<<images[i].getfeaturelen()<<endl;            
-
-        for (int j = 0; j < images[i].getfeaturelen(); j++){
-            cout<<images[i].feature[j]<<" ";            
-
-        }
-
-    }
+//   
 }
 
 int MKHSIN035::KMeansClusterer::closestCentroid(Image image){
@@ -254,16 +255,127 @@ int MKHSIN035::KMeansClusterer::closestCentroid(Image image){
     for(int i = 0; i < image.getfeaturelen(); i++){
         sum += pow(clusters[0].getMean(i)- image.feature[i], 2);
     }
+    minDist = sqrt(sum);
+    closestClusterId = clusters[0].getId();
+    
+    for (int i = 1; i < Kvalue; i++){
+        double d;
+        sum = 0;
+        for(int j = 0; j < image.getfeaturelen(); j++){
+            sum += pow(clusters[i].getMean(j) - image.feature[j], 2);
+        }
+        d = sqrt(sum);
+        if(d < minDist){
+            minDist = d;
+            closestClusterId = clusters[i].getId();
+        }
+    }
+    return closestClusterId;
+}
+
+/*
+ * Function definition for kmeansclustering()
+ */
+void MKHSIN035::KMeansClusterer::kmeansclustering(){
+    //Initialization
+    vector<int> initialPoints;
+    
+    for(int i = 0; i < Kvalue; i++){
+        while(true){
+            srand(time(NULL));
+            int index = rand()%images.size();
+            if(find(initialPoints.begin(), initialPoints.end(), index) == initialPoints.end()){
+                initialPoints.push_back(index);
+                images[index].setClusterId(i);
+                cout<<index<<"\nImage: "<<images[index].getfilename()<<endl;
+                //Create new cluster
+                Cluster cluster(i, images[index]);
+                clusters.push_back(cluster);
+                break;
+            }
+        }
+    }
+    cout<<"Clusters initialized successfully"<<endl;
+    
+    while(true){
+        bool status = true;
+        
+        //Assign each image to its nearest cluster
+        for(int i = 0; i < images.size(); i++){
+            int currentCluster = images[i].getClusterId();
+            int closestCluster = this->closestCentroid(images[i]);
+            
+            //Remove image from wrong cluster 
+            if(currentCluster != closestCluster){
+                for(int c = 0; c < Kvalue; c++){
+                    if(clusters[c].getId() == currentCluster){
+                        clusters[c].removeImage(images[i].getfilename());
+                    }
+                }
+            
+            
+                //Assign image to nearest cluster
+                for(int c = 0; c < Kvalue; c++){
+                    if(clusters[c].getId() == closestCluster){
+                        clusters[c].addImage(images[i]);
+                    }
+                }
+                images[i].setClusterId(closestCluster);
+                status = false;
+            }
+        }
+        
+        //Find the new center of each cluster
+        for(int i = 0; i < Kvalue; i++){
+            int clustersize = clusters[i].getSize();
+            for(int c = 0; c < images[0].getfeaturelen(); c++){
+                double sum = 0;
+                if(clustersize > 0){
+                    for(int d = 0; d < clustersize; d++){
+                        sum += clusters[i].getImage(d).feature[c];
+                    }
+                    double newMean = sum/clustersize;
+                    clusters[i].setMean(c, newMean);
+                }
+            }
+        }
+        if(status){
+            cout<<"Done clustering"<<endl;
+            break;
+        }
+    }
     
 }
 
-
-void MKHSIN035::KMeansClusterer::kmeans(int k){
-    
+/*
+ * getClusteres function definition
+ */
+std::vector<Cluster>& MKHSIN035::KMeansClusterer::getClusteres(){
+    return clusters;
 }
 
+/*
+ * getK function definition
+ */
+int MKHSIN035::KMeansClusterer::getK(){return Kvalue;}
 
-ostream& operator<<(std::ostream& os, const KMeansClusterer& kt){
+
+/*
+ * operator<< definition
+ */
+ostream& MKHSIN035::operator<<(std::ostream& os, MKHSIN035::KMeansClusterer& kt){
     
+    vector<Cluster> clusters = kt.getClusteres();
+    for(int i = 0; i < kt.getK(); i++){
+        os<<"Cluster:"<<i<<" ";
+        int clusterSize = clusters[i].getSize();
+        for(int j = 0; j < clusterSize; j++){
+            os<<clusters[i].getImage(j).getfilename()<<" ";
+        }
+            
+        os<<"\n";
+
+    }
+    return os;
 }
 
