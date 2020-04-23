@@ -16,6 +16,7 @@
 #include <sstream>
 #include <iterator>
 #include <cstring>
+#include <ctime>
 
 
 namespace MKHSIN035{
@@ -75,13 +76,18 @@ namespace MKHSIN035{
     private:
         int id;
         std::vector <double> mean;
-        std::vector <Image> images;
+        std::vector <Image> clusterImages;
     public: 
         
         /*
          * Cluster constructor
          */
         Cluster(int cluster_id, Image image);
+        
+        /*
+         * Removes image from cluster
+         */
+        void addImage(Image image);
         
         /*
          * Removes image specified by filename 
@@ -104,7 +110,7 @@ namespace MKHSIN035{
         Image getImage(int position);
         
         /*
-         * Returns size of images vector
+         * Returns size of clusterImages vector
          */
         int getSize();
         
@@ -121,7 +127,7 @@ namespace MKHSIN035{
     class KMeansClusterer{
     private:
         int Kvalue;
-        vector<Cluster> clusters;
+        std::vector<Cluster> clusters;
     public:
         std::string filenames [10] = {"zero_", "one_", "two_", "three_", "four_", "five_", "six_", "seven_", "eight_", "nine_"}; 
         std::vector<Image> images;
@@ -129,7 +135,7 @@ namespace MKHSIN035{
         /*
          * Default constructor
          */
-        KMeansClusterer();
+        KMeansClusterer(int K);
         
         /*
          * Destructor
@@ -155,9 +161,12 @@ namespace MKHSIN035{
          * This method generates k clusters using the K-means algorithm.
          * 
          */
-        void kmeans(int k);
+        void kmeans();
+        
+        std::vector<Cluster>& getClusteres();
+        int getK();
     };
-    std::ostream& operator<<(std::ostream& os, const KMeansClusterer& kt);
+    std::ostream& operator<<(std::ostream& os, KMeansClusterer& kt);
 
 
 }
