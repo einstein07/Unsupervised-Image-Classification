@@ -154,16 +154,27 @@ namespace MKHSIN035{
          */
         void imageFeature(int bin);
         
+        /*
+         * This method returns the cluster id of the nearest cluster to the image
+         * passed as an argument
+         */
         int closestCentroid(Image image);
 
         
         /*
-         * This method generates k clusters using the K-means algorithm.
+         * This method generates k clusters using the K-means/Floyd algorithm.
          * 
          */
-        void kmeans();
+        void kmeansclustering();
         
+        /*
+         * Returns a vector of clusters
+         */
         std::vector<Cluster>& getClusteres();
+        
+        /*
+         * Returns K value
+         */
         int getK();
     };
     std::ostream& operator<<(std::ostream& os, KMeansClusterer& kt);
