@@ -6,11 +6,13 @@
 
 /* 
  * File:   main.cpp
- * Author: root07
+ * Author: Sindiso Mkhatshwa
  *
  * Created on 26 March 2020, 19:33
  */
-#include "clusterer.h"
+#include "image.h"
+#include "cluster.h"
+#include "kmeansclusterer.h"
 #include <cstdlib>
 
 using namespace MKHSIN035;
@@ -23,24 +25,30 @@ int main(int argc, char** argv) {
     //get the location of the folder that contains the images to be clustered
     string dataset = argv[1];
     string outputfile;
+    bool color = false;
     int k = 10;
     int bin = 1;
     if(argc > 2)
         outputfile = argv[2];
     else
-        outputfile = NULL;
+        outputfile = "";
     if(argc > 3)
         k = atoi(argv[3]);
     if(argc > 4)
         bin = atoi(argv[4]);
-    KMeansClusterer obj(k);
+    if(argc > 5)
+        color = true;
+    
+    KMeansClusterer obj(k, color);
     obj.readDataSet(dataset);
-    obj.imageFeature(bin);
-    obj.kmeans();
-    if(outputfile == NULL)
-        cout<<obj;
+    obj.createFeature(bin, color);
+    obj.kmeansclustering();
+    const KMeansClusterer oj = obj;
+    if(outputfile == "")
+        cout<<oj;
     else{
-        
+        ofstream file(outputfile);
+        file<<oj;
     }
     return 0;
 }
