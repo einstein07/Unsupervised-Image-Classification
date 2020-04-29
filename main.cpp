@@ -38,10 +38,10 @@ int main(int argc, char** argv) {
         bin = atoi(argv[4]);
     if(argc > 5)
         color = true;
-    
-    KMeansClusterer obj(k, color);
+    cout<<"Main k: "<<k<<endl;
+    KMeansClusterer obj(k, color, bin);
     obj.readDataSet(dataset);
-    obj.createFeature(bin, color);
+    obj.createFeature();
     obj.kmeansclustering();
     const KMeansClusterer oj = obj;
     if(outputfile == "")

@@ -28,9 +28,8 @@ void Image::createGreyScale(){
 void Image::createFeature(int bin, bool color){
  
     if(color){
+                
         int feature_size = (256/bin)*3;
-
-
 
 
         feature = new int[feature_size];
@@ -130,12 +129,12 @@ string MKHSIN035::Image::getfilename()const{return filename;}
 /*
  * getgreyscalelen() definition
  */
-int MKHSIN035::Image::getgreyscalelen()const{return greyscalelen;}
+int MKHSIN035::Image::getgreyscalelen()const{return greyscale_len;}
 
 /*
  *getRGBlen() definition         
  */
-int MKHSIN035::Image::getImageDataSetlen()const{return rgb_len;}        
+int MKHSIN035::Image::getImageDataSetlen()const{return data_len;}        
 
 /*
  * getfeaturelen() definition

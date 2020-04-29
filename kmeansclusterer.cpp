@@ -9,7 +9,7 @@ using namespace std;
  * Constructor definition for KMeansClusterer
  */
 
-MKHSIN035::KMeansClusterer::KMeansClusterer(int K, bool colour):Kvalue(K), color(colour){}
+MKHSIN035::KMeansClusterer::KMeansClusterer(int K, bool colour, int bin):Kvalue(K), color(colour), bin(bin){}
 
 /*
  * Destructor definition for KMeansClusterer
@@ -61,7 +61,6 @@ void KMeansClusterer::readDataSet(string folder){
                 //Add image to collection of images
                 images.push_back(obj);
                 
-                
 
             }
             else{
@@ -74,19 +73,25 @@ void KMeansClusterer::readDataSet(string folder){
         
 }
 
+            
+void KMeansClusterer::createFeature(){
+
+
+    for(int i = 0; i < images.size(); i++){
+        images[i].createFeature(bin, color);
+    }
+}
+
+            
 
 int MKHSIN035::KMeansClusterer::closestCentroid(Image image){
     double sum = 0;
     double minDist;
     int closestClusterId;
     int featureSize = 0;
-    if(image.color)
-        featureSize = image.getRGBfeaturelen();
-    else
-        featureSize = image.getfeaturelen();
-    
+   
     for(int i = 0; i < image.getfeaturelen(); i++){
-        sum += pow(clusters[0].getMean(i)- image.feature[i], 2);
+        sum += pow(clusters[0].getMean(i) - image.feature[i], 2);
     }
     minDist = sqrt(sum);
     closestClusterId = clusters[0].getId();
@@ -129,7 +134,7 @@ void MKHSIN035::KMeansClusterer::kmeansclustering(){
         }
     }
     cout<<"Clusters initialized successfully"<<endl;
-    
+    int count = 0;
     while(true){
         bool status = true;
         
@@ -137,7 +142,7 @@ void MKHSIN035::KMeansClusterer::kmeansclustering(){
         for(int i = 0; i < images.size(); i++){
             int currentCluster = images[i].getClusterId();
             int closestCluster = this->closestCentroid(images[i]);
-            
+
             //Remove image from wrong cluster 
             if(currentCluster != closestCluster){
                 for(int c = 0; c < Kvalue; c++){
@@ -156,6 +161,7 @@ void MKHSIN035::KMeansClusterer::kmeansclustering(){
                 images[i].setClusterId(closestCluster);
                 status = false;
             }
+//            cout<<"done assigning images to its nearest cluster. Iteration: "<<count<<endl;
         }
         
         //Find the new center of each cluster
@@ -176,6 +182,7 @@ void MKHSIN035::KMeansClusterer::kmeansclustering(){
             cout<<"Done clustering"<<endl;
             break;
         }
+        count++;
     }
     
 }

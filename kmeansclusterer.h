@@ -23,6 +23,7 @@ namespace MKHSIN035{
         private:
             int Kvalue;
             bool color;
+            int bin;
             std::vector<Cluster> clusters;
         public:
             std::string filenames [10] = {"zero_", "one_", "two_", "three_", "four_",
@@ -32,7 +33,7 @@ namespace MKHSIN035{
             /*
              * Default constructor
              */
-            KMeansClusterer(int K, bool colour);
+            KMeansClusterer(int K, bool colour, int bin);
 
             /*
              * Destructor
@@ -51,12 +52,9 @@ namespace MKHSIN035{
             /*
              * This method uses a histogram to create an image feature for each image
              */
-            void imageFeature(int bin);
+            void createFeature();
 
-            /*
-             * RGB image feature creation
-             */
-            void RGBfeature(int bin);
+
 
             /*
              * This method returns the cluster id of the nearest cluster to the image

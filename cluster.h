@@ -9,68 +9,10 @@
 
 #ifndef CLUSTERER_H
 #define CLUSTERER_H
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <sstream>
-#include <iterator>
-#include <cstring>
-#include <ctime>
+#include "image.h"
 
 
 namespace MKHSIN035{
-    class Image{
-    
-    private:
-    
-        std::string filename;
-        int greyscalelen;
-        int featurelen;
-        int cluster_id;
-        friend class KMeansClusterer;
-    
-    public:
-        //Stores intensity values for each pixel
-        unsigned char* greyscale;
-        int* feature;
-        Image(std::string name);
-        ~Image();
-        /*
-         * Sets the length of the feature array 
-         */
-        void setfeaturelen(int len);
-        /*
-         * Sets the length of the intensity array 
-         */
-        void setgreyscalelen(int len);
-        /*
-         * Sets cluster id for this image
-         */
-        void setClusterId(int cluster_id);
-        /*
-         * Returns filename of image
-         */
-        std::string getfilename();
-        
-        /*
-         * Returns the length of the intensity array
-         */
-        int getgreyscalelen();
-        
-        /*
-         * Returns the length of the feature array
-         */
-        int getfeaturelen();
-        
-        /*
-         * Returns cluster id for this image
-         */
-        int getClusterId();
-        
-    };
-    
-    
     
     class Cluster{
     private:
@@ -102,83 +44,28 @@ namespace MKHSIN035{
         /*
          * Returns id for this cluster
          */
-        int getId();
+        int getId()const;
         
         /*
          * Returns the image at index 'position'
          */
-        Image getImage(int position);
+        Image getImage(int position)const;
         
         /*
          * Returns size of clusterImages vector
          */
-        int getSize();
+        int getSize()const;
         
         /*
          * Returns the mean by position
          */
-        double getMean(int position);
+        double getMean(int position)const;
         
         
     };
     
     
     
-    class KMeansClusterer{
-    private:
-        int Kvalue;
-        std::vector<Cluster> clusters;
-    public:
-        std::string filenames [10] = {"zero_", "one_", "two_", "three_", "four_", "five_", "six_", "seven_", "eight_", "nine_"}; 
-        std::vector<Image> images;
-        
-        /*
-         * Default constructor
-         */
-        KMeansClusterer(int K);
-        
-        /*
-         * Destructor
-         */
-        ~KMeansClusterer();
-        
-        /*
-         * This method reads the color images. 
-         * Each color image is then converted into greyscale image i.e. a single
-         * value per pixel.
-         */
-        void readDataSet(std::string folder);
-        
-        /*
-         * This method uses a histogram to create an image feature for each image
-         */
-        void imageFeature(int bin);
-        
-        /*
-         * This method returns the cluster id of the nearest cluster to the image
-         * passed as an argument
-         */
-        int closestCentroid(Image image);
-
-        
-        /*
-         * This method generates k clusters using the K-means/Floyd algorithm.
-         * 
-         */
-        void kmeansclustering();
-        
-        /*
-         * Returns a vector of clusters
-         */
-        std::vector<Cluster>& getClusteres();
-        
-        /*
-         * Returns K value
-         */
-        int getK();
-    };
-    std::ostream& operator<<(std::ostream& os, KMeansClusterer& kt);
-
 
 }
 
