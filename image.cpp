@@ -8,11 +8,11 @@ using namespace std;
 /*
  * Default Constructor definition for Image class
  */
-MKHSIN035::Image::Image():filename(""), cluster_id(-1), min_dist(DBL_MAX), featurelen(-1), data_len(-1){}
+MKHSIN035::Image::Image():folder(""),filename(""), cluster_id(-1), min_dist(DBL_MAX), featurelen(-1), data_len(-1){}
 /*
  * @params name: filename of image
  */
-MKHSIN035::Image::Image(std::string name):filename(name), cluster_id(-1), min_dist(DBL_MAX), featurelen(-1), data_len(-1) {}
+MKHSIN035::Image::Image(std::string folder, bool color):color(color),folder(folder), cluster_id(-1), min_dist(DBL_MAX), featurelen(-1), data_len(-1) {}
 
 /*
  * Destructor definition for KMeansClusterer
@@ -24,7 +24,7 @@ MKHSIN035::Image::~Image(){}
  * Constructs by copying another object
  * @params constant l-value ref to object of same type
  */
-MKHSIN035::Image::Image(const Image& rhs): filename(rhs.filename), 
+MKHSIN035::Image::Image(const Image& rhs): color(rhs.color),folder(rhs.folder),filename(rhs.filename), 
         cluster_id(rhs.cluster_id), min_dist(rhs.min_dist), data_len(rhs.data_len), greyscale_len(rhs.greyscale_len), featurelen(rhs.featurelen),
         imageDataSet(rhs.imageDataSet), greyscale(rhs.greyscale), feature(rhs.feature){
     
@@ -37,16 +37,17 @@ MKHSIN035::Image::Image(const Image& rhs): filename(rhs.filename),
  */
 MKHSIN035::Image::Image(Image&& rhs){
     if(this != &rhs){
-    
-        filename = std::move(rhs.filename);
-        cluster_id = rhs.cluster_id;
-        min_dist = rhs.min_dist;
-        data_len = rhs.data_len;
-        greyscale_len = rhs.greyscale_len;
-        featurelen = rhs.featurelen;
-        imageDataSet = rhs.imageDataSet;
-        greyscale = rhs.greyscale;
-        feature = rhs.feature;
+        this->color = std::move(rhs.color);
+        this->folder = std::move(rhs.folder);
+        this->filename = std::move(rhs.filename);
+        this->cluster_id = rhs.cluster_id;
+        this->min_dist = rhs.min_dist;
+        this->data_len = rhs.data_len;
+        this->greyscale_len = rhs.greyscale_len;
+        this->featurelen = rhs.featurelen;
+        this->imageDataSet = rhs.imageDataSet;
+        this->greyscale = rhs.greyscale;
+        this->feature = rhs.feature;
         
         //Leave rhs in destructable state
         //int "move" copies anyway so set all ints to defaults
@@ -68,7 +69,9 @@ MKHSIN035::Image::Image(Image&& rhs){
 
 Image& Image::operator=(const Image& rhs){
     if(this!=&rhs){
-        this->filename = std::move(rhs.filename);
+        this->color = rhs.color;
+        this->folder = rhs.folder;
+        this->filename = rhs.filename;
         this->cluster_id = rhs.cluster_id;
         this->min_dist = rhs.min_dist;
         this->data_len = rhs.data_len;
@@ -87,7 +90,8 @@ Image& Image::operator=(const Image& rhs){
  */
 Image& Image::operator=(Image&& rhs){
     if(this != &rhs){
-    
+        this->color = std::move(rhs.color);
+        this->folder = std::move(rhs.folder);
         this->filename = std::move(rhs.filename);
         this->cluster_id = rhs.cluster_id;
         this->min_dist = rhs.min_dist;
@@ -108,31 +112,33 @@ Image& Image::operator=(Image&& rhs){
     }
 } 
 
-bool Image::read(string folder){
-    string extension = ".ppm";
-
-    imageDataSet = new unsigned char[32*32*3];
-    data_len = 32*32*3;
-    int counter = 0;
-            
-    //string name = filenames[i]+to_string(j)+extension;
-    //this->filename = name;
-    //string filename = folder+name;
-    ifstream dataset(folder.c_str(), ios::binary);
+bool Image::read(string filename){
+    
+    string extension = ".ppm";         
+    string name = filename+extension;
+    this->filename = name;
+    name = this->folder+name;
+    ifstream dataset(name.c_str(), ios::binary);
 
     if(!dataset){
-        cout<<"Could not open "<<filename<<endl;
+        cout<<"Could not open "<<name<<endl;
         return false;
     }
     else{
-        cout<<"Opened"<<endl;
-        string line = ""; 
+        string line = "";
+        string size;
         while(getline(dataset, line)){
-            cout<<line<<endl;
             if(line == "255")
                 break;
+            size = line;
         }
-
+        std::string::size_type sz;   // alias of size_t
+        int Nrows = stoi(size, &sz);
+        int Ncols = stoi (size.substr(sz));
+            
+        int counter = 0;
+        data_len = Nrows*Ncols*3;
+        imageDataSet = new unsigned char[data_len];
         unsigned char value;
         char buf[sizeof(unsigned char)];
         while(dataset.read(buf,sizeof(buf))){
@@ -141,15 +147,18 @@ bool Image::read(string folder){
             counter++;
 
         }
+        
+        if(!color)
+            createGreyScale();
     }
 
             
 }
 
 void Image::createGreyScale(){
-    this->greyscale = new unsigned char[(this->data_len/3)];
     int count = 0;
-    this->greyscale_len = this->data_len/3;
+    this->greyscale_len = ceil(this->data_len/3.0);
+    this->greyscale = new unsigned char[greyscale_len];
     for (int c = 0; c < this->greyscale_len; c++){
       
         greyscale[c] = 0.21*imageDataSet[count] + 0.72*imageDataSet[count+1] + 0.07*imageDataSet[count+2];
@@ -159,7 +168,7 @@ void Image::createGreyScale(){
 }
 
         
-void Image::createFeature(int bin, bool color){
+void Image::createFeature(int bin){
  
     if(color){
         int feature_size = ceil((256.0/bin))*3;
@@ -170,36 +179,25 @@ void Image::createFeature(int bin, bool color){
         for (int a = 0; a < feature_size; a++){
             feature[a] = 0;
         }
-        cout<<"Data length: "<<data_len<<endl;
         for (int k = 0; k < feature_size; k+=3){
             for (int j = 0; j <= data_len; j+=3){
-                int r = static_cast<int>(imageDataSet[j]);
-                if (Lbound <= r){
-                    if(r < Ubound){
+                if (Lbound <= imageDataSet[j] && imageDataSet[j] < Ubound){
                         feature[k] += 1;
-                    }
+                    
                 }
-                int g = static_cast<int>(imageDataSet[j+1]);
-                if (Lbound <= g){
-                    if(g < Ubound){
+                
+                if (Lbound <= imageDataSet[j+1] && imageDataSet[j+1] < Ubound){
                         feature[k+1] += 1;
-                    }
                 }
-                int b = static_cast<int>(imageDataSet[j+2]);
-                if (Lbound <= b){
-                    if(b < Ubound){
+                
+                if (Lbound <= imageDataSet[j+2] && imageDataSet[j+2] < Ubound){
                         feature[k+2] += 1;
-                    }
                 }
             }
             Lbound += bin;
             Ubound += bin;
         }
-        cout<<this->filename<<endl;
-        for(int i = 0; i < featurelen; i ++){
-            cout<<feature[i]<<" ";
-        }
-        cout<<endl;
+
        
     }
     else{
@@ -221,19 +219,14 @@ void Image::createFeature(int bin, bool color){
             Lbound += bin;
             Ubound += bin;
         }
-        
-        cout<<this->filename<<endl;
-        for(int i = 0; i < greyscale_len; i ++){
-            cout<<+greyscale[i]<<" ";
-        }
-        cout<<endl;
+
     }
 
     
    
 }
 
-double Image::distance(Image image, bool color){
+double Image::distance(Image image){
     double sum = 0.0;           
 //    if(color){
 //        for(int i = 0; i < data_len; i++){
