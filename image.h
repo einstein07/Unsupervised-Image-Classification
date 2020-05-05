@@ -21,6 +21,7 @@
 #include <iterator>
 #include <cstring>
 #include <ctime>
+#include <cfloat>
 #include <math.h>
 #include <algorithm>
 namespace MKHSIN035{
@@ -33,19 +34,41 @@ class Image{
         int data_len;
         int featurelen;
         int cluster_id;
+        double min_dist;
         friend class KMeansClusterer;
     
     public:
         //Stores intensity values for each pixel
+        
         unsigned char* imageDataSet; //RGB
-        unsigned char* greyscale;
+        unsigned char* greyscale; //In grey scale format
         int* feature;
+        
+        /*
+         * Big Six
+         */
+        //Default constructor
+        Image();
+        //Constructor
         Image(std::string name);
+        //Destructor
         ~Image();
+        //Move constructor
+        Image(Image&& rhs);
+        //Copy constructor
+        Image(const Image& rhs);
+        //Assignment op
+        Image& operator=(const Image& rhs);
+        //Move assignment op
+        Image& operator=(Image&& rhs);
+        
+        bool read(std::string folder);
         
         void createGreyScale();
         
         void createFeature(int bin, bool color);
+        
+        double distance(Image i, bool color);
 
         /*
          * Sets length of feature array 
