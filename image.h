@@ -29,6 +29,8 @@ class Image{
     
     private:
     
+        std::string folder;
+        bool color;
         std::string filename;
         int greyscale_len;
         int data_len;
@@ -50,7 +52,7 @@ class Image{
         //Default constructor
         Image();
         //Constructor
-        Image(std::string name);
+        Image(std::string folder, bool color);
         //Destructor
         ~Image();
         //Move constructor
@@ -62,13 +64,13 @@ class Image{
         //Move assignment op
         Image& operator=(Image&& rhs);
         
-        bool read(std::string folder);
+        bool read(std::string filename);
         
         void createGreyScale();
         
-        void createFeature(int bin, bool color);
+        void createFeature(int bin);
         
-        double distance(Image i, bool color);
+        double distance(Image i);
 
         /*
          * Sets length of feature array 
