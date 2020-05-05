@@ -8,95 +8,246 @@ using namespace std;
 /*
  * Default Constructor definition for Image class
  */
-MKHSIN035::Image::Image(std::string name):filename(name), cluster_id(0){}
+MKHSIN035::Image::Image():filename(""), cluster_id(-1), min_dist(DBL_MAX), featurelen(-1), data_len(-1){}
+/*
+ * @params name: filename of image
+ */
+MKHSIN035::Image::Image(std::string name):filename(name), cluster_id(-1), min_dist(DBL_MAX), featurelen(-1), data_len(-1) {}
 
 /*
  * Destructor definition for KMeansClusterer
  */
 MKHSIN035::Image::~Image(){}
 
+/*
+ * The copy constructor.
+ * Constructs by copying another object
+ * @params constant l-value ref to object of same type
+ */
+MKHSIN035::Image::Image(const Image& rhs): filename(rhs.filename), 
+        cluster_id(rhs.cluster_id), min_dist(rhs.min_dist), data_len(rhs.data_len), greyscale_len(rhs.greyscale_len), featurelen(rhs.featurelen),
+        imageDataSet(rhs.imageDataSet), greyscale(rhs.greyscale), feature(rhs.feature){
+    
+}
+
+/*
+ * The move constructor
+ * Constructs by moving resources from one object to another object
+ * @params r-value ref to object of same type
+ */
+MKHSIN035::Image::Image(Image&& rhs){
+    if(this != &rhs){
+    
+        filename = std::move(rhs.filename);
+        cluster_id = rhs.cluster_id;
+        min_dist = rhs.min_dist;
+        data_len = rhs.data_len;
+        greyscale_len = rhs.greyscale_len;
+        featurelen = rhs.featurelen;
+        imageDataSet = rhs.imageDataSet;
+        greyscale = rhs.greyscale;
+        feature = rhs.feature;
+        
+        //Leave rhs in destructable state
+        //int "move" copies anyway so set all ints to defaults
+        rhs.cluster_id = -1;
+        rhs.min_dist = DBL_MAX;
+        rhs.data_len = -1;
+        rhs.featurelen = -1;
+        rhs.greyscale_len = -1;
+    }
+       
+}
+
+/*
+ * Copy assignment operator
+ * Copies content of one object to another
+ * 
+ * @params Constant l-value ref to class type
+ */
+
+Image& Image::operator=(const Image& rhs){
+    if(this!=&rhs){
+        this->filename = std::move(rhs.filename);
+        this->cluster_id = rhs.cluster_id;
+        this->min_dist = rhs.min_dist;
+        this->data_len = rhs.data_len;
+        this->greyscale_len = rhs.greyscale_len;
+        this->featurelen = rhs.featurelen;
+        this->imageDataSet = rhs.imageDataSet;
+        this->greyscale = rhs.greyscale;
+        this->feature = rhs.feature;
+    }
+    return *this;
+}
+
+/*
+ * Move Assignment op
+ * 
+ */
+Image& Image::operator=(Image&& rhs){
+    if(this != &rhs){
+    
+        this->filename = std::move(rhs.filename);
+        this->cluster_id = rhs.cluster_id;
+        this->min_dist = rhs.min_dist;
+        this->data_len = rhs.data_len;
+        this->greyscale_len = rhs.greyscale_len;
+        this->featurelen = rhs.featurelen;
+        this->imageDataSet = rhs.imageDataSet;
+        this->greyscale = rhs.greyscale;
+        this->feature = rhs.feature;
+        
+        //Leave rhs in destructable state
+        //int "move" copies anyway so set all ints to defaults
+        rhs.cluster_id = -1;
+        rhs.min_dist = DBL_MAX;
+        rhs.data_len = -1;
+        rhs.featurelen = -1;
+        rhs.greyscale_len = -1;
+    }
+} 
+
+bool Image::read(string folder){
+    string extension = ".ppm";
+
+    imageDataSet = new unsigned char[32*32*3];
+    data_len = 32*32*3;
+    int counter = 0;
+            
+    //string name = filenames[i]+to_string(j)+extension;
+    //this->filename = name;
+    //string filename = folder+name;
+    ifstream dataset(folder.c_str(), ios::binary);
+
+    if(!dataset){
+        cout<<"Could not open "<<filename<<endl;
+        return false;
+    }
+    else{
+        cout<<"Opened"<<endl;
+        string line = ""; 
+        while(getline(dataset, line)){
+            cout<<line<<endl;
+            if(line == "255")
+                break;
+        }
+
+        unsigned char value;
+        char buf[sizeof(unsigned char)];
+        while(dataset.read(buf,sizeof(buf))){
+            memcpy(&value, buf, sizeof(value));
+            imageDataSet[counter] = value;
+            counter++;
+
+        }
+    }
+
+            
+}
+
 void Image::createGreyScale(){
     this->greyscale = new unsigned char[(this->data_len/3)];
     int count = 0;
+    this->greyscale_len = this->data_len/3;
     for (int c = 0; c < this->greyscale_len; c++){
+      
         greyscale[c] = 0.21*imageDataSet[count] + 0.72*imageDataSet[count+1] + 0.07*imageDataSet[count+2];
         count += 3;
     }
+    
 }
 
         
 void Image::createFeature(int bin, bool color){
  
     if(color){
-                
-        int feature_size = (256/bin)*3;
-
-
+        int feature_size = ceil((256.0/bin))*3;
         feature = new int[feature_size];
         setfeaturelen(feature_size);
         int Lbound = 0;
         int Ubound = bin;
-
         for (int a = 0; a < feature_size; a++){
             feature[a] = 0;
         }
-
-
-
-
+        cout<<"Data length: "<<data_len<<endl;
         for (int k = 0; k < feature_size; k+=3){
             for (int j = 0; j <= data_len; j+=3){
-                if (Lbound <= imageDataSet[j]  && imageDataSet[j] < Ubound){
-                    feature[k]++;
+                int r = static_cast<int>(imageDataSet[j]);
+                if (Lbound <= r){
+                    if(r < Ubound){
+                        feature[k] += 1;
+                    }
                 }
-                if (Lbound <= imageDataSet[j+1]  && imageDataSet[j+1] < Ubound){
-                    feature[k+1]++;
+                int g = static_cast<int>(imageDataSet[j+1]);
+                if (Lbound <= g){
+                    if(g < Ubound){
+                        feature[k+1] += 1;
+                    }
                 }
-                if (Lbound <= imageDataSet[j+2]  && imageDataSet[j+2] < Ubound){
-                    feature[k+2]++;
+                int b = static_cast<int>(imageDataSet[j+2]);
+                if (Lbound <= b){
+                    if(b < Ubound){
+                        feature[k+2] += 1;
+                    }
                 }
-
             }
-
             Lbound += bin;
             Ubound += bin;
-
         }
-
+        cout<<this->filename<<endl;
+        for(int i = 0; i < featurelen; i ++){
+            cout<<feature[i]<<" ";
+        }
+        cout<<endl;
+       
     }
     else{
-        
-        int feature_size = 256/bin;
-
+        int feature_size = ceil((256.0/bin));
         feature = new int[feature_size];
         setfeaturelen(feature_size);
         int Lbound = 0;
         int Ubound = bin;
-
         //Initialize feature array with zeros
         for (int a = 0; a < feature_size; a++){
             feature[a] = 0;
         }
-
-
         for (int k = 0; k < feature_size; k++){
             for (int j = 0; j <= greyscale_len; j++){
                 if (Lbound <= greyscale[j]  && greyscale[j] < Ubound){
                     feature[k]++;
                 }
-
             }
-
             Lbound += bin;
             Ubound += bin;
-
         }
-
-
+        
+        cout<<this->filename<<endl;
+        for(int i = 0; i < greyscale_len; i ++){
+            cout<<+greyscale[i]<<" ";
+        }
+        cout<<endl;
     }
 
     
    
+}
+
+double Image::distance(Image image, bool color){
+    double sum = 0.0;           
+//    if(color){
+//        for(int i = 0; i < data_len; i++){
+//            sum += pow(feature[i] - image.feature[i], 2);
+//
+//        }
+//    }
+//    else{
+        for(int i = 0; i < featurelen; i++){
+            sum += pow(this->feature[i] - image.feature[i], 2);
+            
+        }
+   // }
+    return sum;
 }
 
 
@@ -140,7 +291,6 @@ int MKHSIN035::Image::getImageDataSetlen()const{return data_len;}
  * getfeaturelen() definition
  */
 int MKHSIN035::Image::getfeaturelen()const{return featurelen;}
-
 
 /*
  * getClusterId() definition
