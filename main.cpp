@@ -40,16 +40,21 @@ int main(int argc, char** argv) {
         color = true;
     cout<<"Main k: "<<k<<endl;
     KMeansClusterer obj(k, color, bin);
-    obj.readDataSet(dataset);
-    obj.createFeature();
-    obj.kmeansclustering();
-    const KMeansClusterer oj = obj;
-    if(outputfile == "")
-        cout<<oj;
-    else{
-        ofstream file(outputfile);
-        file<<oj;
-    }
+    Image im(dataset);
+    string file = dataset+"eight_10.ppm";
+    cout<<"File name: "<<file<<endl;
+    im.read(file);
+    im.createFeature(bin, true);
+    //obj.readDataSet();
+    //obj.createFeature();
+//    obj.kmeansclustering();
+//    const KMeansClusterer oj = obj;
+//    if(outputfile == "")
+//        cout<<oj;
+//    else{
+//        ofstream file(outputfile);
+//        file<<oj;
+//    }
     return 0;
 }
 
