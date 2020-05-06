@@ -1,3 +1,9 @@
+/* 
+ * File:   image.cpp
+ * Author: Sindiso Mkhatshwa
+ *
+ * Created on 26 March 2020, 19:33
+ */
 #include "image.h"
 using namespace MKHSIN035;
 using namespace std;
@@ -17,7 +23,10 @@ MKHSIN035::Image::Image(std::string folder, bool color):color(color),folder(fold
 /*
  * Destructor definition for KMeansClusterer
  */
-MKHSIN035::Image::~Image(){}
+MKHSIN035::Image::~Image(){
+    /*double free or corruption (!prev)
+     Aborted (core dumped)*/
+}
 
 /*
  * The copy constructor.
@@ -85,8 +94,8 @@ Image& Image::operator=(const Image& rhs){
 }
 
 /*
- * Move Assignment op
- * 
+ * Move Assignment operator
+ * @params r-value reference of class type
  */
 Image& Image::operator=(Image&& rhs){
     if(this != &rhs){
@@ -112,16 +121,17 @@ Image& Image::operator=(Image&& rhs){
     }
 } 
 
+/*
+ * Reads image data as RGB values
+ */
 bool Image::read(string filename){
     
-    string extension = ".ppm";         
-    string name = filename+extension;
-    this->filename = name;
-    name = this->folder+name;
-    ifstream dataset(name.c_str(), ios::binary);
+    this->filename = filename;
+    filename = this->folder+filename;
+    ifstream dataset(filename.c_str(), ios::binary);
 
     if(!dataset){
-        cout<<"Could not open "<<name<<endl;
+        cout<<"Could not open "<<filename<<endl;
         return false;
     }
     else{
@@ -133,8 +143,8 @@ bool Image::read(string filename){
             size = line;
         }
         std::string::size_type sz;   // alias of size_t
-        int Nrows = stoi(size, &sz);
-        int Ncols = stoi (size.substr(sz));
+        Nrows = stoi(size, &sz);
+        Ncols = stoi (size.substr(sz));
             
         int counter = 0;
         data_len = Nrows*Ncols*3;
@@ -155,6 +165,9 @@ bool Image::read(string filename){
             
 }
 
+/*
+ * Converts image to greyscale
+ */
 void Image::createGreyScale(){
     int count = 0;
     this->greyscale_len = ceil(this->data_len/3.0);
@@ -167,7 +180,10 @@ void Image::createGreyScale(){
     
 }
 
-        
+/*
+ * Creates image feature according to specified bin size
+ * @params bin
+ */        
 void Image::createFeature(int bin){
  
     if(color){
@@ -220,12 +236,13 @@ void Image::createFeature(int bin){
             Ubound += bin;
         }
 
-    }
-
-    
-   
+    }  
 }
 
+/*
+ * Computes distance between this image and the argument/centroid
+ * @params Image centroid
+ */
 double Image::distance(Image image){
     double sum = 0.0;           
 //    if(color){
@@ -243,49 +260,83 @@ double Image::distance(Image image){
     return sum;
 }
 
+/*
+ * Advanced feature extraction using Sobel edge detector
+ */
+void MKHSIN035::Image::SobelEdgeDetector(){
+    feature = new int[greyscale_len];
+    featurelen = greyscale_len;
+    
+    //Horizontal
+    int g_x[3][3] = {{-1, 0, 1},
+           {-2, 0, 2},
+           {-1, 0, 1}
+          };
+    //vertical
+    int g_y[3][3] = {{-1, -2, -1},
+             {0, 0, 0},
+             {1, 2, 1}
+            };
+    int val_x = 0;
+    int val_y = 0;
+        
+    int colCounter = 0;
+    for(int i = 0; i < featurelen; i++){
+        if((i == 0)||(i == Nrows-1)||(colCounter==0)||(colCounter == Ncols-1)){
+            val_x = 0;
+            val_y = 0;
+        }
+        else{
+            for(int k = 0; k < 3; k++){
+                for(int j = 0; j < 3; j++){
+                        
+                    val_x = (val_x + (int)(greyscale[i])) * g_x[k][j];
+                    val_y = (val_y + (int)(greyscale[i])) * g_y[k][j];
+                }
+            }
+        }
+        feature[i] = sqrt(val_x*val_x + val_y*val_y);
+        val_x = val_y = 0;
+        if(colCounter == Ncols)
+            colCounter =0;
+        else
+            colCounter++;
+
+    }
+    
+}
 
 /*
- * setfeaturelen(int) definition
+ * Sets feature size
+ * @params int lent
  */
 void MKHSIN035::Image::setfeaturelen(int len){featurelen = len;}
 
 /*
- * setgreyscalelen(int) definition
+ * Sets grey scale size
+ * @params int len
  */
 void MKHSIN035::Image::setgreyscalelen(int len){greyscale_len = len;}
 
 /*
- * 
+ * Sets image data size
+ * @params int length
  */
 void MKHSIN035::Image::setImageDataSetlen(int len){data_len = len;}
 
 
 /*
- * setClusterId(int) method definition 
+ * Sets cluster id
+ * @params int id 
  */
 void MKHSIN035::Image::setClusterId(int cluster_id){this->cluster_id = cluster_id;}
 
 /*
- * getfilename definition
+ * Returns this object's filename
  */
 string MKHSIN035::Image::getfilename()const{return filename;}
 
 /*
- * getgreyscalelen() definition
- */
-int MKHSIN035::Image::getgreyscalelen()const{return greyscale_len;}
-
-/*
- *getRGBlen() definition         
- */
-int MKHSIN035::Image::getImageDataSetlen()const{return data_len;}        
-
-/*
- * getfeaturelen() definition
- */
-int MKHSIN035::Image::getfeaturelen()const{return featurelen;}
-
-/*
- * getClusterId() definition
+ * Returns this object's cluster id
  */
 int MKHSIN035::Image::getClusterId()const{return this->cluster_id;}

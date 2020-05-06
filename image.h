@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /* 
  * File:   Image.h
  * Author: Sindiso Mkhatshwa
@@ -37,6 +31,7 @@ class Image{
         int featurelen;
         int cluster_id;
         double min_dist;
+        int Nrows, Ncols;
         friend class KMeansClusterer;
     
     public:
@@ -69,6 +64,8 @@ class Image{
         void createGreyScale();
         
         void createFeature(int bin);
+        
+        void SobelEdgeDetector();
         
         double distance(Image i);
 

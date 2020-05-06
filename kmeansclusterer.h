@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /* 
  * File:   KMeansClusterer.h
@@ -15,25 +10,24 @@
 #define KMEANSCLUSTERER_H
 
 #include "image.h"
-#include "cluster.h"
 
 
 namespace MKHSIN035{
     class KMeansClusterer{
         private:
             int Kvalue;
-            bool color;
-            int bin;
-            std::vector<Cluster> clusters;
         public:
-            std::string filenames [10] = {"zero_", "one_", "two_", "three_", "four_",
-            "five_", "six_", "seven_", "eight_", "nine_"}; 
+            
             std::vector<Image> images;
 
             /*
              * Default constructor
              */
-            KMeansClusterer(int K, bool colour, int bin);
+            KMeansClusterer();
+            /*
+             * Default constructor
+             */
+            KMeansClusterer(int K);
 
             /*
              * Destructor
@@ -41,44 +35,21 @@ namespace MKHSIN035{
             ~KMeansClusterer();
 
             /*
-             * This method reads the color images. 
-             * Each color image is then converted into greyscale image i.e. a single
-             * value per pixel.
+             * Initializes clusters
              */
-            void readDataSet(std::string folder);
-            
-            void createGreyScale();
-
-            /*
-             * This method uses a histogram to create an image feature for each image
-             */
-            void createFeature();
-
-
-
-            /*
-             * This method returns the cluster id of the nearest cluster to the image
-             * passed as an argument
-             */
-            int closestCentroid(Image image);
-
+            void initializeClusters(std::vector<int>& initIndices, std::vector<Image>& centroids, std::vector<std::string>& initialPointsFilenames);
 
             /*
              * This method generates k clusters using the K-means/Floyd algorithm.
-             * 
              */
             void kmeansclustering();
-
-            /*
-             * Returns a vector of clusters
-             */
-            std::vector<Cluster>& getClusteres();
 
             /*
              * Returns K value
              */
             int getK()const;
         };
+        
         std::ostream& operator<<(std::ostream& os, const KMeansClusterer& kt);
 
 
